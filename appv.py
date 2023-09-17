@@ -149,6 +149,12 @@ def video_app():
                         transition-duration: .1s;
                         width: 350px;
                     }
+
+                    @media (min-width: 768px) {
+                          .customButton{
+                            padding: 0 2.6rem;
+                          }
+                    }
                     </style>
                     """,
                     unsafe_allow_html=True,
