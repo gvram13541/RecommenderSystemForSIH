@@ -71,6 +71,7 @@ import streamlit as st
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
+import webbrowser
 
 def video_app():
 
@@ -92,25 +93,75 @@ def video_app():
 
         video_indices = cosine_scores.argsort()[0][::-1]
 
-        recommended_urls = df.iloc[video_indices[:10]]['URL'].tolist()
+        recommended_videos = df.iloc[video_indices[:10]][['Title', 'URL']].values.tolist()
 
-        return recommended_urls
+        return recommended_videos
 
     st.markdown("<h3 style='color: orange;'>Which Video's You are Looking for....</h3>", unsafe_allow_html=True)
     st.write("Enter your search query below to find recommended videos.")
 
     search_query = st.text_input("Enter your search query:")
     
-    recommend_button = st.button("Recommend")
-
+    recommend_button = st.button("Recommend", type="primary")
+    
     if recommend_button:
         if search_query:
-            recommended_urls = recommend_videos(search_query)
+            recommended_videos = recommend_videos(search_query)
 
-            if recommended_urls:
+            if recommended_videos:
                 st.subheader("Recommended Videos:")
-                for i, url in enumerate(recommended_urls, start=1):
-                    st.write(f"Recommended Video #{i}: {url}")
+                # Create two columns to display the recommended videos
+                col1, col2 = st.columns(2)
+                
+                # Add custom CSS styles within the app
+                st.write(
+                    """
+                    <style>
+                    .custom-link {
+                        text-decoration: none;
+                        color: #000000;
+                        font-weight: bold;
+                    }
+                    .customButton {
+                        background-image: linear-gradient(92.88deg, #455EB5 9.16%, #5643CC 43.89%, #673FD7 64.72%);
+                        border-radius: 8px;
+                        border-style: none;
+                        box-sizing: border-box;
+                        color: #FFFFFF;
+                        cursor: pointer;
+                        flex-shrink: 0;
+                        font-family: "Inter UI","SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;
+                        font-size: 16px;
+                        font-weight: 500;
+                        width: 350px;
+                        height: 4rem;
+                        padding: 0 1.6rem;
+                        text-align: center;
+                        text-shadow: rgba(0, 0, 0, 0.25) 0 3px 8px;
+                        transition: all .5s;
+                        user-select: none;
+                        -webkit-user-select: none;
+                        touch-action: manipulation;
+                    }
+
+                    .customButton:hover {
+                        box-shadow: rgba(80, 63, 205, 0.5) 0 1px 30px;
+                        transition-duration: .1s;
+                        width: 350px;
+                    }
+                    </style>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+                for i, (title, url) in enumerate(recommended_videos, start=1):
+                    # Use HTML anchor tags to create clickable links
+                    link_html = f'<a href="{url}" target="_blank" class="custom-link">{title}</a>'
+                    button_html = f'<button class="customButton">{link_html}</button>'
+                    if i % 2 == 1:
+                        col1.write(button_html, unsafe_allow_html=True)
+                    else:
+                        col2.write(button_html, unsafe_allow_html=True)
             else:
                 st.warning("No videos found matching your query. Please try a different search.")
         else:
